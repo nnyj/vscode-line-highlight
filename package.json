@@ -1,0 +1,125 @@
+{
+  "name": "line-highlight",
+  "displayName": "Line Highlight",
+  "description": "Highlight editor lines from .vscode/highlights/*.json files",
+  "version": "0.0.1",
+  "publisher": "nnyj",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nnyj/vscode-line-highlight"
+  },
+  "icon": "images/icon.png",
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "lineHighlight.clearAll",
+        "title": "Line Highlight: Clear All Highlights"
+      },
+      {
+        "command": "lineHighlight.toggle",
+        "title": "Line Highlight: Toggle Highlight on Line"
+      },
+      {
+        "command": "lineHighlight.green",
+        "title": "Highlight Green"
+      },
+      {
+        "command": "lineHighlight.red",
+        "title": "Highlight Red"
+      },
+      {
+        "command": "lineHighlight.yellow",
+        "title": "Highlight Yellow"
+      },
+      {
+        "command": "lineHighlight.blue",
+        "title": "Highlight Blue"
+      },
+      {
+        "command": "lineHighlight.purple",
+        "title": "Highlight Purple"
+      },
+      {
+        "command": "lineHighlight.remove",
+        "title": "Remove Highlight"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "lineHighlight.submenu",
+        "label": "Line Highlight"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "lineHighlight.submenu",
+          "group": "lineHighlight"
+        }
+      ],
+      "lineHighlight.submenu": [
+        { "command": "lineHighlight.green", "group": "colors" },
+        { "command": "lineHighlight.red", "group": "colors" },
+        { "command": "lineHighlight.yellow", "group": "colors" },
+        { "command": "lineHighlight.blue", "group": "colors" },
+        { "command": "lineHighlight.purple", "group": "colors" },
+        { "command": "lineHighlight.remove", "group": "actions" },
+        { "command": "lineHighlight.clearAll", "group": "actions" }
+      ]
+    },
+    "configuration": {
+      "title": "Line Highlight",
+      "properties": {
+        "lineHighlight.gutterBar.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show colored gutter bar alongside line background"
+        },
+        "lineHighlight.overviewRuler.position": {
+          "type": "string",
+          "enum": ["left", "center", "right", "full", "off"],
+          "default": "right",
+          "description": "Position of highlight marks in the scrollbar overview ruler"
+        },
+        "lineHighlight.colors.green": {
+          "type": "string",
+          "default": "rgba(0, 180, 0, 0.15)",
+          "description": "Background color for green highlights"
+        },
+        "lineHighlight.colors.red": {
+          "type": "string",
+          "default": "rgba(220, 0, 0, 0.15)",
+          "description": "Background color for red highlights"
+        },
+        "lineHighlight.colors.yellow": {
+          "type": "string",
+          "default": "rgba(220, 200, 0, 0.15)",
+          "description": "Background color for yellow highlights"
+        },
+        "lineHighlight.colors.blue": {
+          "type": "string",
+          "default": "rgba(0, 120, 220, 0.15)",
+          "description": "Background color for blue highlights"
+        },
+        "lineHighlight.colors.purple": {
+          "type": "string",
+          "default": "rgba(160, 0, 220, 0.15)",
+          "description": "Background color for purple highlights"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "package": "npx @vscode/vsce package"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.2.0"
+  }
+}
