@@ -2,6 +2,8 @@
 
 Highlight editor lines from JSON files. Highlights are file-based, not stored in VSCode internal state, so they work with version control, external tools, and AI assistants.
 
+![sample](images/sample.png)
+
 ## Claude Code / AI assistant setup
 
 Add this to your `CLAUDE.md` or `AGENTS.md`:
