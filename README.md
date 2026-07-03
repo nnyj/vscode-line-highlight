@@ -58,6 +58,10 @@ Highlights are stored in `.vscode/highlights/<path>.json` per workspace. Filenam
 | `color` | `string` | `green`, `red`, `yellow`, `blue`, `purple` |
 | `note` | `string` | Optional hover tooltip |
 
+### Position tracking
+
+Highlights follow lines as you edit in the editor (inserts and deletes above shift them, deleting a highlighted line removes it) and corrected positions are written back to the JSON on save. Edits made outside VSCode are not tracked: line numbers are trusted as-is, regenerate the JSON if they drift.
+
 ### Context menu
 
 Right-click any line or selection → "Line Highlight" → pick color. Same color again removes it.

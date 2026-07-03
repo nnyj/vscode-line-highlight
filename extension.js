@@ -13,6 +13,7 @@ const GUTTER_COLORS = {
 
 let decorationTypes = {};
 let tracked = new Map();
+let lineCounts = new Map();
 let watchers = [];
 let selfWriting = false;
 
@@ -33,73 +34,53 @@ function highlightFileFromSourcePath(sourcePath, workspaceFolder) {
   return path.join(getHighlightsDir(workspaceFolder), encoded + '.json');
 }
 
-function expandLines(lineSpec) {
-  if (typeof lineSpec === 'number') return [lineSpec];
+function parseLineSpec(lineSpec) {
+  if (typeof lineSpec === 'number') return { start: lineSpec, end: lineSpec };
   if (typeof lineSpec === 'string' && lineSpec.includes('-')) {
-    const [start, end] = lineSpec.split('-').map(Number);
-    if (isNaN(start) || isNaN(end)) return [];
-    const lines = [];
-    for (let i = Math.min(start, end); i <= Math.max(start, end); i++) {
-      lines.push(i);
-    }
-    return lines;
+    const [a, b] = lineSpec.split('-').map(Number);
+    if (isNaN(a) || isNaN(b)) return null;
+    return { start: Math.min(a, b), end: Math.max(a, b) };
   }
   const n = Number(lineSpec);
-  return isNaN(n) ? [] : [n];
+  return isNaN(n) ? null : { start: n, end: n };
 }
 
-function loadHighlightsForFile(filePath, workspaceFolder) {
-  const highlightFile = highlightFileFromSourcePath(filePath, workspaceFolder);
-  try {
-    const content = fs.readFileSync(highlightFile, 'utf8');
-    const entries = JSON.parse(content);
-    if (!Array.isArray(entries)) return [];
-
-    const items = [];
-    for (const entry of entries) {
-      const color = entry.color || 'blue';
-      if (!COLOR_NAMES.includes(color)) continue;
-      for (const line of expandLines(entry.line)) {
-        const zeroLine = Math.max(0, line - 1);
-        items.push({
-          color,
-          note: entry.note || null,
-          range: new vscode.Range(zeroLine, 0, zeroLine, 0),
-        });
-      }
+function itemsFromEntries(entries, maxLine) {
+  const items = [];
+  for (const entry of entries) {
+    const color = entry.color || 'blue';
+    if (!COLOR_NAMES.includes(color)) continue;
+    const spec = parseLineSpec(entry.line);
+    if (!spec) continue;
+    for (let line = spec.start; line <= Math.min(spec.end, maxLine); line++) {
+      items.push({
+        color,
+        note: entry.note || null,
+        range: new vscode.Range(line - 1, 0, line - 1, 0),
+      });
     }
-    return items;
-  } catch {
-    return [];
   }
+  return items;
 }
 
-function writeHighlightsForFile(filePath, workspaceFolder) {
-  const items = tracked.get(filePath);
-  const highlightFile = highlightFileFromSourcePath(filePath, workspaceFolder);
-  const dir = path.dirname(highlightFile);
-
-  if (!items || items.length === 0) {
-    try { fs.unlinkSync(highlightFile); } catch {}
-    return;
-  }
-
+// regroups per-line items into range entries
+function buildEntries(items) {
   const grouped = new Map();
   for (const item of items) {
     const key = JSON.stringify([item.color, item.note || '']);
-    if (!grouped.has(key)) grouped.set(key, { color: item.color, note: item.note, lines: [] });
-    grouped.get(key).lines.push(item.range.start.line + 1);
+    if (!grouped.has(key)) grouped.set(key, { color: item.color, note: item.note, lines: new Set() });
+    grouped.get(key).lines.add(item.range.start.line + 1);
   }
 
   const entries = [];
   for (const { color, note, lines } of grouped.values()) {
-    lines.sort((a, b) => a - b);
+    const sorted = [...lines].sort((a, b) => a - b);
 
     let i = 0;
-    while (i < lines.length) {
+    while (i < sorted.length) {
       let j = i;
-      while (j + 1 < lines.length && lines[j + 1] === lines[j] + 1) j++;
-      const entry = { line: i === j ? lines[i] : `${lines[i]}-${lines[j]}`, color };
+      while (j + 1 < sorted.length && sorted[j + 1] === sorted[j] + 1) j++;
+      const entry = { line: i === j ? sorted[i] : `${sorted[i]}-${sorted[j]}`, color };
       if (note) entry.note = note;
       entries.push(entry);
       i = j + 1;
@@ -111,10 +92,26 @@ function writeHighlightsForFile(filePath, workspaceFolder) {
     const bLine = typeof b.line === 'number' ? b.line : Number(b.line.split('-')[0]);
     return aLine - bLine;
   });
+  return entries;
+}
 
+function writeHighlightsForFile(document, workspaceFolder) {
+  const filePath = document.uri.fsPath;
+  const items = tracked.get(filePath);
+  const highlightFile = highlightFileFromSourcePath(filePath, workspaceFolder);
+
+  if (!items || items.length === 0) {
+    try { fs.unlinkSync(highlightFile); } catch {}
+    return;
+  }
+
+  const json = JSON.stringify(buildEntries(items), null, 2) + '\n';
+  try { if (fs.readFileSync(highlightFile, 'utf8') === json) return; } catch {}
+
+  const dir = path.dirname(highlightFile);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   selfWriting = true;
-  fs.writeFileSync(highlightFile, JSON.stringify(entries, null, 2) + '\n');
+  fs.writeFileSync(highlightFile, json);
   setTimeout(() => { selfWriting = false; }, 200);
 }
 
@@ -174,9 +171,18 @@ function loadAndRender(editor) {
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
   if (!workspaceFolder) return;
 
-  const filePath = editor.document.uri.fsPath;
-  const items = loadHighlightsForFile(filePath, workspaceFolder);
-  tracked.set(filePath, items);
+  const document = editor.document;
+  const filePath = document.uri.fsPath;
+  const highlightFile = highlightFileFromSourcePath(filePath, workspaceFolder);
+
+  let entries = [];
+  try {
+    entries = JSON.parse(fs.readFileSync(highlightFile, 'utf8'));
+    if (!Array.isArray(entries)) entries = [];
+  } catch {}
+
+  tracked.set(filePath, itemsFromEntries(entries, document.lineCount));
+  lineCounts.set(filePath, document.lineCount);
   renderDecorations(editor);
 }
 
@@ -235,7 +241,7 @@ function toggleHighlight(editor, color) {
   }
 
   renderDecorations(editor);
-  writeHighlightsForFile(filePath, workspaceFolder);
+  writeHighlightsForFile(editor.document, workspaceFolder);
 }
 
 function removeHighlight(editor) {
@@ -257,7 +263,7 @@ function removeHighlight(editor) {
   }
 
   renderDecorations(editor);
-  writeHighlightsForFile(filePath, workspaceFolder);
+  writeHighlightsForFile(editor.document, workspaceFolder);
 }
 
 function persistTracked(document) {
@@ -269,7 +275,52 @@ function persistTracked(document) {
   const items = tracked.get(filePath);
   const valid = items.filter(item => item.range.start.line < document.lineCount);
   tracked.set(filePath, valid);
-  writeHighlightsForFile(filePath, workspaceFolder);
+  writeHighlightsForFile(document, workspaceFolder);
+}
+
+// heuristic in-buffer line-shift, persisted on save; external edits are not tracked.
+// caller guarantees the file has tracked items; returns true when a reload from JSON is needed
+function shiftTrackedLines(document, contentChanges) {
+  const filePath = document.uri.fsPath;
+  const items = tracked.get(filePath);
+  const prevCount = lineCounts.get(filePath);
+  lineCounts.set(filePath, document.lineCount);
+  if (!contentChanges.length) return false;
+
+  // single change replacing the whole old doc = external reload, re-read positions from JSON
+  const first = contentChanges[0];
+  if (
+    contentChanges.length === 1 &&
+    first.range.start.line === 0 && first.range.start.character === 0 &&
+    prevCount !== undefined && first.range.end.line >= prevCount - 1
+  ) {
+    return true;
+  }
+
+  for (const change of contentChanges) {
+    const startLine = change.range.start.line;
+    const endLine = change.range.end.line;
+    const newLineCount = change.text.split('\n').length - 1;
+    const delta = newLineCount - (endLine - startLine);
+    if (delta === 0) continue;
+
+    // char 0 to char 0 spans delete/insert whole lines; else the span edit is mid-line
+    const wholeLine = change.range.start.character === 0 && change.range.end.character === 0;
+    const dropFrom = wholeLine ? startLine : startLine + 1;
+    const dropTo = wholeLine ? endLine - 1 : endLine;
+    const shiftFrom = wholeLine ? endLine : endLine + 1;
+
+    for (let i = items.length - 1; i >= 0; i--) {
+      const line = items[i].range.start.line;
+      if (line >= dropFrom && line <= dropTo) {
+        items.splice(i, 1);
+      } else if (line >= shiftFrom) {
+        const moved = line + delta;
+        items[i].range = new vscode.Range(moved, 0, moved, 0);
+      }
+    }
+  }
+  return false;
 }
 
 function setupWatchers(context) {
@@ -347,6 +398,21 @@ function activate(context) {
 
   context.subscriptions.push(
     vscode.window.onDidChangeVisibleTextEditors(() => renderAll())
+  );
+
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument(e => {
+      if (!tracked.get(e.document.uri.fsPath)?.length) return;
+      const needsRemap = shiftTrackedLines(e.document, e.contentChanges);
+      for (const editor of vscode.window.visibleTextEditors) {
+        if (editor.document !== e.document) continue;
+        if (needsRemap) {
+          loadAndRender(editor);
+        } else {
+          renderDecorations(editor);
+        }
+      }
+    })
   );
 
   context.subscriptions.push(

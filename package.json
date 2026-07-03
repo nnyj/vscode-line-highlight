@@ -2,7 +2,7 @@
   "name": "line-highlight",
   "displayName": "Line Highlight",
   "description": "Highlight editor lines from .vscode/highlights/*.json files",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "nnyj",
   "engines": {
     "vscode": "^1.75.0"
@@ -13,8 +13,12 @@
     "url": "https://github.com/nnyj/vscode-line-highlight"
   },
   "icon": "images/icon.png",
-  "categories": ["Other"],
-  "activationEvents": ["onStartupFinished"],
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./extension.js",
   "contributes": {
     "commands": [
@@ -65,13 +69,34 @@
         }
       ],
       "lineHighlight.submenu": [
-        { "command": "lineHighlight.green", "group": "colors" },
-        { "command": "lineHighlight.red", "group": "colors" },
-        { "command": "lineHighlight.yellow", "group": "colors" },
-        { "command": "lineHighlight.blue", "group": "colors" },
-        { "command": "lineHighlight.purple", "group": "colors" },
-        { "command": "lineHighlight.remove", "group": "actions" },
-        { "command": "lineHighlight.clearAll", "group": "actions" }
+        {
+          "command": "lineHighlight.green",
+          "group": "colors"
+        },
+        {
+          "command": "lineHighlight.red",
+          "group": "colors"
+        },
+        {
+          "command": "lineHighlight.yellow",
+          "group": "colors"
+        },
+        {
+          "command": "lineHighlight.blue",
+          "group": "colors"
+        },
+        {
+          "command": "lineHighlight.purple",
+          "group": "colors"
+        },
+        {
+          "command": "lineHighlight.remove",
+          "group": "actions"
+        },
+        {
+          "command": "lineHighlight.clearAll",
+          "group": "actions"
+        }
       ]
     },
     "configuration": {
@@ -84,7 +109,13 @@
         },
         "lineHighlight.overviewRuler.position": {
           "type": "string",
-          "enum": ["left", "center", "right", "full", "off"],
+          "enum": [
+            "left",
+            "center",
+            "right",
+            "full",
+            "off"
+          ],
           "default": "right",
           "description": "Position of highlight marks in the scrollbar overview ruler"
         },
