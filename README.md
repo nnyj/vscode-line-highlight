@@ -1,49 +1,42 @@
-# Line Highlight
+# vscode-line-highlight
 
-Highlight editor lines from JSON files. Highlights are file-based, not stored in VSCode internal state, so they work with version control, external tools, and AI assistants.
+<div align="center">
+
+[![Stars](https://img.shields.io/github/stars/nnyj/vscode-line-highlight?style=for-the-badge&labelColor=555&color=e3b341)](https://github.com/nnyj/vscode-line-highlight/stargazers)
+
+</div>
+
+VS Code extension that highlights editor lines from plain JSON files in `.vscode/highlights/`, making highlights version-controllable and writable by scripts and AI assistants.
 
 ![sample](images/sample.png)
 
-## Claude Code / AI assistant setup
+## Features
 
-Add this to your `CLAUDE.md` or `AGENTS.md`:
+- Five named colors: green, red, yellow, blue, purple
+- File-based: highlights stored in `.vscode/highlights/`, not in VS Code state
+- Line positions shift automatically during in-editor edits; written back on save
+- External edits (outside VS Code) are not tracked, line numbers are trusted as-is
+- Context menu submenu for per-color toggle and remove
+- Command palette toggle with color picker
+- Overview ruler marks; optional gutter bar
+- All background colors configurable
+- Multi-root workspace support
 
-```
-Line highlights (vscode extension):
-- When emphasizing lines in editor, write `.vscode/highlights/<path__to__file.ext>.json`
-- Format: `[{"line": 1, "color": "green", "note": "optional"}]`
-- Colors: green, red, yellow, blue, purple
-- Ranges: `"line": "3-7"`, `__` = path separator in filename
-```
+## Usage
 
-Any tool that writes the JSON file triggers the extension via file watcher:
+Right-click any line → "Line Highlight" → pick color. Same color again removes it.
+
+Command palette: "Line Highlight: Toggle Highlight on Line" (color picker), "Line Highlight: Clear All Highlights".
+
+### Programmatic
+
+Any tool can write the JSON file; the extension reloads via file watcher:
 
 ```sh
 echo '[{"line": 42, "color": "red"}]' > .vscode/highlights/src__app.py.json
 ```
 
-## Features
-
-- Full line background highlighting with 5 named colors
-- File-based: plain JSON in `.vscode/highlights/`, git-committable, no VSCode Settings Sync needed
-- Tool-friendly: AI assistants, scripts, CI can write highlights programmatically
-- Right-click context menu to highlight/remove
-- Command palette toggle with color picker
-- Highlights track line positions through edits (auto-shift on insert/delete)
-- Overview ruler marks near scrollbar
-- Optional gutter bar
-- All colors configurable
-- Multi-root workspace support
-
-## How it works
-
-Highlights are stored in `.vscode/highlights/<path>.json` per workspace. Filename maps to source file with `__` as path separator:
-
-```
-.vscode/highlights/src__app.py.json  →  src/app.py
-```
-
-### JSON format
+Filename uses `__` as path separator (`src/app.py` → `src__app.py.json`).
 
 ```json
 [
@@ -52,43 +45,33 @@ Highlights are stored in `.vscode/highlights/<path>.json` per workspace. Filenam
 ]
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `line` | `number` or `"start-end"` | Line number (1-based) or range |
-| `color` | `string` | `green`, `red`, `yellow`, `blue`, `purple` |
-| `note` | `string` | Optional hover tooltip |
+Add to `CLAUDE.md` / `AGENTS.md` for AI assistant support:
 
-### Position tracking
-
-Highlights follow lines as you edit in the editor (inserts and deletes above shift them, deleting a highlighted line removes it) and corrected positions are written back to the JSON on save. Edits made outside VSCode are not tracked: line numbers are trusted as-is, regenerate the JSON if they drift.
-
-### Context menu
-
-Right-click any line or selection → "Line Highlight" → pick color. Same color again removes it.
-
-### Command palette
-
-`Ctrl+Shift+P` → "Line Highlight: Toggle Highlight on Line" → pick color.
-
-`Ctrl+Shift+P` → "Line Highlight: Clear All Highlights" → removes all highlights and deletes JSON files.
+```
+Line highlights:
+- Write `.vscode/highlights/<path__to__file.ext>.json`
+- Format: `[{"line": 1, "color": "green", "note": "optional"}]`
+- Colors: green, red, yellow, blue, purple
+- Ranges: `"line": "3-7"`, `__` = path separator
+```
 
 ## Settings
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `lineHighlight.gutterBar.enabled` | `false` | Show colored gutter bar |
-| `lineHighlight.overviewRuler.position` | `right` | Ruler position: `left`, `center`, `right`, `full`, `off` |
-| `lineHighlight.colors.green` | `rgba(0, 180, 0, 0.15)` | Green background color |
-| `lineHighlight.colors.red` | `rgba(220, 0, 0, 0.15)` | Red background color |
-| `lineHighlight.colors.yellow` | `rgba(220, 200, 0, 0.15)` | Yellow background color |
-| `lineHighlight.colors.blue` | `rgba(0, 120, 220, 0.15)` | Blue background color |
-| `lineHighlight.colors.purple` | `rgba(160, 0, 220, 0.15)` | Purple background color |
+| `lineHighlight.gutterBar.enabled` | `false` | Show colored left-edge gutter bar |
+| `lineHighlight.overviewRuler.position` | `"right"` | Ruler: `left`, `center`, `right`, `full`, `off` |
+| `lineHighlight.colors.green` | `rgba(0,180,0,0.15)` | Green background |
+| `lineHighlight.colors.red` | `rgba(220,0,0,0.15)` | Red background |
+| `lineHighlight.colors.yellow` | `rgba(220,200,0,0.15)` | Yellow background |
+| `lineHighlight.colors.blue` | `rgba(0,120,220,0.15)` | Blue background |
+| `lineHighlight.colors.purple` | `rgba(160,0,220,0.15)` | Purple background |
 
 ## Install
 
 ```sh
 npm run package
-code --install-extension line-highlight-0.0.1.vsix
+code --install-extension line-highlight-0.0.2.vsix
 ```
 
 ## License
