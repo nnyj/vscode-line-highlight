@@ -3,6 +3,9 @@
 <div align="center">
 
 [![Stars](https://img.shields.io/github/stars/nnyj/vscode-line-highlight?style=for-the-badge&labelColor=555&color=e3b341)](https://github.com/nnyj/vscode-line-highlight/stargazers)
+[![Downloads](https://img.shields.io/github/downloads/nnyj/vscode-line-highlight/total?style=for-the-badge&labelColor=555&color=2ea44f)](https://github.com/nnyj/vscode-line-highlight/releases)
+[![Latest Release](https://img.shields.io/github/v/release/nnyj/vscode-line-highlight?style=for-the-badge&label=Latest%20Release&labelColor=555&color=3572d6)](https://github.com/nnyj/vscode-line-highlight/releases/latest)
+[![Build](https://img.shields.io/github/actions/workflow/status/nnyj/vscode-line-highlight/release.yml?style=for-the-badge&labelColor=555)](https://github.com/nnyj/vscode-line-highlight/actions)
 
 </div>
 
