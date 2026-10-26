@@ -1,0 +1,6 @@
+- Tests pass on Windows and Linux
+- Crash on save when the file is untitled
+- Bump version before packaging:
+  - `package.json` and `package-lock.json`
+- README settings table updated
+- Idea: per-workspace color overrides

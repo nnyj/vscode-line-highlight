@@ -64,17 +64,17 @@ Line highlights:
 |---------|---------|-------------|
 | `lineHighlight.gutterBar.enabled` | `false` | Show colored left-edge gutter bar |
 | `lineHighlight.overviewRuler.position` | `"right"` | Ruler: `left`, `center`, `right`, `full`, `off` |
-| `lineHighlight.colors.green` | `rgba(0,180,0,0.15)` | Green background |
-| `lineHighlight.colors.red` | `rgba(220,0,0,0.15)` | Red background |
-| `lineHighlight.colors.yellow` | `rgba(220,200,0,0.15)` | Yellow background |
-| `lineHighlight.colors.blue` | `rgba(0,120,220,0.15)` | Blue background |
-| `lineHighlight.colors.purple` | `rgba(160,0,220,0.15)` | Purple background |
+| `lineHighlight.colors.green` | `rgba(0,180,0,0.3)` | Green background |
+| `lineHighlight.colors.red` | `rgba(220,0,0,0.3)` | Red background |
+| `lineHighlight.colors.yellow` | `rgba(220,200,0,0.2)` | Yellow background |
+| `lineHighlight.colors.blue` | `rgba(0,120,220,0.3)` | Blue background |
+| `lineHighlight.colors.purple` | `rgba(160,0,220,0.3)` | Purple background |
 
 ## Install
 
 ```sh
 npm run package
-code --install-extension line-highlight-0.0.2.vsix
+code --install-extension line-highlight-0.0.3.vsix
 ```
 
 ## License

@@ -123,7 +123,7 @@ function createDecorationTypes() {
   const rulerPosition = config.get('overviewRuler.position', 'right');
 
   for (const color of COLOR_NAMES) {
-    const bgColor = config.get(`colors.${color}`, `rgba(128, 128, 128, 0.15)`);
+    const bgColor = config.get(`colors.${color}`, `rgba(128, 128, 128, 0.3)`);
     const opts = {
       backgroundColor: bgColor,
       isWholeLine: true,
@@ -156,10 +156,16 @@ function renderDecorations(editor) {
   const items = tracked.get(filePath) || [];
 
   for (const color of COLOR_NAMES) {
-    const colorItems = items.filter(i => i.color === color);
-    const decos = colorItems.map(item => {
-      const deco = { range: item.range };
-      if (item.note) deco.hoverMessage = new vscode.MarkdownString(item.note);
+    // overlapping entries of one color would paint a line twice and stack the alpha
+    const byLine = new Map();
+    for (const item of items.filter(i => i.color === color)) {
+      const line = item.range.start.line;
+      if (!byLine.has(line)) byLine.set(line, { range: item.range, notes: [] });
+      if (item.note && !byLine.get(line).notes.includes(item.note)) byLine.get(line).notes.push(item.note);
+    }
+    const decos = [...byLine.values()].map(({ range, notes }) => {
+      const deco = { range };
+      if (notes.length) deco.hoverMessage = new vscode.MarkdownString(notes.join('\n\n'));
       return deco;
     });
     editor.setDecorations(decorationTypes[color], decos);

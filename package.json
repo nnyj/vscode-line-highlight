@@ -2,7 +2,7 @@
   "name": "line-highlight",
   "displayName": "Line Highlight",
   "description": "Highlight editor lines from .vscode/highlights/*.json files",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "nnyj",
   "engines": {
     "vscode": "^1.75.0"
@@ -121,27 +121,27 @@
         },
         "lineHighlight.colors.green": {
           "type": "string",
-          "default": "rgba(0, 180, 0, 0.15)",
+          "default": "rgba(0, 180, 0, 0.3)",
           "description": "Background color for green highlights"
         },
         "lineHighlight.colors.red": {
           "type": "string",
-          "default": "rgba(220, 0, 0, 0.15)",
+          "default": "rgba(220, 0, 0, 0.3)",
           "description": "Background color for red highlights"
         },
         "lineHighlight.colors.yellow": {
           "type": "string",
-          "default": "rgba(220, 200, 0, 0.15)",
+          "default": "rgba(220, 200, 0, 0.2)",
           "description": "Background color for yellow highlights"
         },
         "lineHighlight.colors.blue": {
           "type": "string",
-          "default": "rgba(0, 120, 220, 0.15)",
+          "default": "rgba(0, 120, 220, 0.3)",
           "description": "Background color for blue highlights"
         },
         "lineHighlight.colors.purple": {
           "type": "string",
-          "default": "rgba(160, 0, 220, 0.15)",
+          "default": "rgba(160, 0, 220, 0.3)",
           "description": "Background color for purple highlights"
         }
       }

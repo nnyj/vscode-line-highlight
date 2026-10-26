@@ -1,4 +1,8 @@
 .git
+.github
+.gitignore
 node_modules
 images/generate_icon.py
 images/sample.png
+images/sample.md
+.vscode

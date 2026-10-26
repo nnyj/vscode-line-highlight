@@ -1,0 +1,27 @@
+[
+  {
+    "line": 1,
+    "color": "green",
+    "note": "done"
+  },
+  {
+    "line": 2,
+    "color": "red",
+    "note": "blocker"
+  },
+  {
+    "line": "3-4",
+    "color": "yellow",
+    "note": "in progress"
+  },
+  {
+    "line": 5,
+    "color": "blue",
+    "note": "docs"
+  },
+  {
+    "line": 6,
+    "color": "purple",
+    "note": "later"
+  }
+]
